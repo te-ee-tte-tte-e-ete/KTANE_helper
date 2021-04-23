@@ -12,6 +12,8 @@ wf = {}
 mm = {}
 mc = {}
 cw = {}
+ws = {}
+mz = {}
 
 class Swagbutton(tk.Label):
     def __init__(self, master=None, cnf={}, **kw):
@@ -35,11 +37,14 @@ def init_all():
     mm_init()
     mc_init()
     cw_init()
+    ws_init()
+    mz_init()
 
 def update():
     sw_answer()
     tb_answer()
     ss_answer()
+    cw_answer()
 
 def reset_module():
     module = mod['module'].get()
@@ -61,6 +66,10 @@ def reset_module():
         mc_init()
     elif module == "complicated wires":
         cw_init()
+    elif module == "wire sequences":
+        ws_init()
+    elif module == "mazes":
+        mz_init()
     update()
     change_module()
 
@@ -100,7 +109,13 @@ def change_module():
         loaded = mc['frame']
     elif module == "complicated wires":
         cw['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
-        loaded = mc['frame']
+        loaded = cw['frame']
+    elif module == "wire sequences":
+        ws['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
+        loaded = ws['frame']
+    elif module == "mazes":
+        mz['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
+        loaded = mz['frame']
 
 def pph_init():
     pph['frame'] = tk.Frame(frame1)
@@ -115,7 +130,7 @@ def pph_init():
     pph['lfrk'] = tk.BooleanVar(value = False)
     pph['e_lfrk'] = tk.Checkbutton(pph['frame'], text = "lit FRK", variable = pph['lfrk'], command = update)
     pph['batteries'] = tk.IntVar(value = 1)
-    pph['e1_batteries'] = tk.Radiobutton(pph['frame'], text = '1 battery', variable = pph['batteries'], value = 1, command = update)
+    pph['e1_batteries'] = tk.Radiobutton(pph['frame'], text = '0-1 batteries', variable = pph['batteries'], value = 1, command = update)
     pph['e2_batteries'] = tk.Radiobutton(pph['frame'], text = '2 batteries', variable = pph['batteries'], value = 2, command = update)
     pph['e3_batteries'] = tk.Radiobutton(pph['frame'], text = '3+ batteries', variable = pph['batteries'], value = 3, command = update)
     pph['resetmod_button'] = tk.Button(pph['frame'], text = "Reset Module", command = reset_module)
@@ -575,13 +590,13 @@ def cw_init():
     cw['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
     cw['cframe'] = tk.Frame(cw['frame'])
     cw['r'] = tk.BooleanVar()
-    cw['rcb'] = tk.Checkbutton(cw['cframe'], text = 'red', variable = cw['r'])
+    cw['rcb'] = tk.Checkbutton(cw['cframe'], text = 'red', variable = cw['r'], command = cw_answer)
     cw['b'] = tk.BooleanVar()
-    cw['bcb'] = tk.Checkbutton(cw['cframe'], text = 'blue', variable = cw['b'])
+    cw['bcb'] = tk.Checkbutton(cw['cframe'], text = 'blue', variable = cw['b'], command = cw_answer)
     cw['s'] = tk.BooleanVar()
-    cw['scb'] = tk.Checkbutton(cw['cframe'], text = 'star', variable = cw['s'])
+    cw['scb'] = tk.Checkbutton(cw['cframe'], text = 'star', variable = cw['s'], command = cw_answer)
     cw['l'] = tk.BooleanVar()
-    cw['lcb'] = tk.Checkbutton(cw['cframe'], text = 'LED', variable = cw['l'])
+    cw['lcb'] = tk.Checkbutton(cw['cframe'], text = 'LED', variable = cw['l'], command = cw_answer)
 
     cw['l_dep'] = tk.Label(cw['frame'], text = 'dependencies', fg = 'grey')
     cw['edep'] = Swagbutton(cw['frame'], text = '✗ even', fg = 'grey')
@@ -599,7 +614,102 @@ def cw_init():
     cw['edep'].grid(row = 2, column = 0, sticky = 'w')
     cw['bdep'].grid(row = 3, column = 0, sticky = 'w')
     cw['pdep'].grid(row = 4, column = 0, sticky = 'w')
-    cw['alabel'].grid(row  = 1, column = 2, columnspan = 4)
+    cw['alabel'].grid(row  = 1, rowspan = 4, column = 0, columnspan = 2)
+
+    cw_answer()
+
+def cw_answer():
+    r = cw['r'].get()
+    b = cw['b'].get()
+    s = cw['s'].get()
+    l = cw['l'].get()
+    cw['edep'].deselect()
+    cw['bdep'].deselect()
+    cw['pdep'].deselect()
+    if (not r and not b and not s and not l) or (r and not b and s and not l) or (not r and not b and s and not l):
+        cw['alabel'].config(text = 'cut')
+    if (not r and not b and not s and l) or (r and b and s and l) or (not r and b and s and not l):
+        cw['alabel'].config(text = 'do not cut')
+    if (not r and b and not s and not l) or (r and not b and not s and not l) or (r and b and not s and not l) or (r and b and not s and l):
+        if pph['digit'].get() == 'even':
+            cw['alabel'].config(text = 'cut')
+        else: 
+            cw['alabel'].config(text = 'do not cut')
+        cw['edep'].select()
+    if (not r and b and not s and l) or (r and b and s and not l) or (not r and b and s and l):
+        if pph['pport'].get():
+            cw['alabel'].config(text = 'cut')
+        else: 
+            cw['alabel'].config(text = 'do not cut')
+        cw['pdep'].select()
+    if (r and not b and not s and l) or (r and not b and s and l) or (not r and not b and s and l):
+        if pph['batteries'].get() > 1:
+            cw['alabel'].config(text = 'cut')
+        else:
+            cw['alabel'].config(text = 'do not cut')
+        cw['bdep'].select()
+    
+def ws_init():
+    ws['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
+    ws['l_red'] = tk.Label(ws['frame'], text = 'red')
+    ws['a_red'] = tk.Label(ws['frame'])
+    ws['red'] = tk.IntVar()
+    ws['redrb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['red'], value = i, command = ws_answer) for i in range(10)]
+    ws['l_blue'] = tk.Label(ws['frame'], text = 'blue')
+    ws['a_blue'] = tk.Label(ws['frame'])
+    ws['blue'] = tk.IntVar()
+    ws['bluerb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['blue'], value = i, command = ws_answer) for i in range(10)]
+    ws['l_black'] = tk.Label(ws['frame'], text = 'black')
+    ws['a_black'] = tk.Label(ws['frame'])
+    ws['black'] = tk.IntVar()
+    ws['blackrb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['black'], value = i, command = ws_answer) for i in range(10)]
+
+    for i in range(10):
+        ws['redrb'][i].grid(row = i+1, column = 0)
+        ws['bluerb'][i].grid(row = i+1, column = 1)
+        ws['blackrb'][i].grid(row = i+1, column = 2)
+    ws['l_red'].grid(row = 0, column = 0)
+    ws['l_blue'].grid(row = 0, column = 1)
+    ws['l_black'].grid(row = 0, column = 2)
+    ws['a_red'].grid(row = 11, column = 0)
+    ws['a_blue'].grid(row = 11, column = 1)
+    ws['a_black'].grid(row = 11, column = 2)
+
+def ws_answer():
+    red_answers = ['', 'C', 'B', 'A', 'A, C', 'B', 'A, C', 'A, B, C', 'A, B', 'B']
+    blue_answers = ['', 'B', 'A, C', 'B', 'A', 'B', 'B, C', 'C', 'A, C', 'A']
+    black_answers = ['', 'A, B, C', 'A, C', 'B', 'A, C', 'B', 'B, C', 'A, B', 'C', 'C']
+    ws['a_red'].config(text = red_answers[ws['red'].get()])
+    ws['a_blue'].config(text = blue_answers[ws['blue'].get()])
+    ws['a_black'].config(text = black_answers[ws['black'].get()])
+
+def mz_init():
+    mz['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
+    mz['mframe'] = tk.Frame(mz['frame'])
+    mz['circle'] = tk.StringVar()
+    mz['mrb'] = [tk.Radiobutton(mz['mframe'], variable = mz['circle'], value = f'{(i//6)+1} {(i%6)+1}', command = mz_answer) for i in range(36)]
+    mz['ic'] = tk.Label(mz['frame'])
+    mz['img'] = tk.Label(mz['frame'])
+
+    mz['mframe'].grid(row = 1, column = 0)
+    for i in range(36):
+        mz['mrb'][i].grid(row = i//6, column = i%6)
+    mz['ic'].grid(row = 0, column = 0)
+    mz['img'].grid(row = 2, column = 0)
+
+def mz_answer():
+    c = [int(i) for i in mz['circle'].get().split()]
+    mazes = [[[2, 1], [3, 6]], [[4, 2], [2, 5]], [[4, 4], [4, 6]], [[1, 1], [4, 1]], [[3, 5], [6, 4]], [[5, 3], [1, 5]], [[1, 2], [6, 2]], [[4, 3], [1, 4]], [[5, 1], [2, 3]]]
+    for i1 in mazes:
+        for i2 in i1:
+            if c == i2:
+                img = ImageTk.PhotoImage(Image.open(f"pictures/mz/{mazes.index(i1)+1}.png").resize((200, 200)))
+                mz['img'].config(image = img)
+                mz['img'].image = img
+                mz['ic'].config(text = '')
+                return
+    mz['ic'].config(text = f'invalid circle: {c}')
+    
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
