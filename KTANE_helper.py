@@ -758,23 +758,37 @@ def kb_init():
     kb['cb'] = [tk.Checkbutton(kb['rframe'], variable = kb['kbs'][i], command = kb_answer) for i in range(12)]
     kb['alabel'] = tk.Label(kb['frame'])
     
-    for i in range(12):
+    for i in range(6):
         kb['cb'][i].grid(row = i//6, column = i%6)
     kb['rframe'].grid(row = 0, column = 0)
     kb['alabel'].grid(row = 1, column = 0)
 
 def kb_answer():
     knobs = [knob.get() for knob in kb['kbs']]
-    l = [[False, False, True, False, True, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, True, False, True, True], [False, True, True, False, False, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, False, False, False, True], [False, False, False, False, True, False, True, False, False, True, True, True], [False, False, False, False, True, False, False, False, False, True, True, False], [True, False, True, True, True, True, True, True, True, False, True, False], [True, False, True, True, False, False, True, True, True, False, True, False]]
+    # l = [[False, False, True, False, True, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, True, False, True, True], [False, True, True, False, False, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, False, False, False, True], [False, False, False, False, True, False, True, False, False, True, True, True], [False, False, False, False, True, False, False, False, False, True, True, False], [True, False, True, True, True, True, True, True, True, False, True, False], [True, False, True, True, False, False, True, True, True, False, True, False]]
+    l = [[False, False, True, False, True, True], [True, False, True, False, True, False], [False, True, True, False, False, True], [True, False, True, False, True, False], [False, False, False, False, True, False], [True, False, True, True, True, True], [True, False, True, True, False, False]]
     options = l.copy()
+
     for b in l:
-        check = [b[i] for i in range(12) if knobs[i]]
-        if False in check:
+        if b != knobs[:6]:
             options.remove(b)
     if len(options) == 1:
-        kb['alabel'].config(text = ['up', 'up', 'down', 'down', 'left', 'left', 'right', 'right'][l.index(options[0])])
+        kb['alabel'].config(text = ['up', 'up', 'down', 'down', 'left', 'right', 'right'][l.index(options[0])])
+    elif knobs[:6] == [True, False, True, False, True, False]:
+        if set(knobs[6:]) == {False}:
+            for i in range(6, 12):
+                kb['cb'][i].grid(row = i//6, column = i%6)
+        if knobs[6:] == [False, True, True, False, True, True]:
+            kb['alabel'].config(text = 'up')
+        elif knobs[6:] == [False, True, False, False, False, True]:
+            kb['alabel'].config(text = 'down')
+        else: 
+            kb['alabel'].config(text = '')
+        return
     else:
         kb['alabel'].config(text = '')
+    for i in range(6, 12):
+        kb['cb'][i].grid_forget()
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
