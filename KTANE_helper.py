@@ -12,6 +12,7 @@ wf = {}
 mm = {}
 mc = {}
 cw = {}
+ws = {}
 
 class Swagbutton(tk.Label):
     def __init__(self, master=None, cnf={}, **kw):
@@ -35,6 +36,7 @@ def init_all():
     mm_init()
     mc_init()
     cw_init()
+    ws_init()
 
 def update():
     sw_answer()
@@ -62,6 +64,8 @@ def reset_module():
         mc_init()
     elif module == "complicated wires":
         cw_init()
+    elif module == "wire sequences":
+        ws_init()
     update()
     change_module()
 
@@ -102,6 +106,9 @@ def change_module():
     elif module == "complicated wires":
         cw['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
         loaded = cw['frame']
+    elif module == "wire sequences":
+        ws['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
+        loaded = ws['frame']
 
 def pph_init():
     pph['frame'] = tk.Frame(frame1)
@@ -635,6 +642,39 @@ def cw_answer():
             cw['alabel'].config(text = 'do not cut')
         cw['bdep'].select()
     
+def ws_init():
+    ws['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
+    ws['l_red'] = tk.Label(ws['frame'], text = 'red')
+    ws['a_red'] = tk.Label(ws['frame'])
+    ws['red'] = tk.IntVar()
+    ws['redrb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['red'], value = i, command = ws_answer) for i in range(10)]
+    ws['l_blue'] = tk.Label(ws['frame'], text = 'blue')
+    ws['a_blue'] = tk.Label(ws['frame'])
+    ws['blue'] = tk.IntVar()
+    ws['bluerb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['blue'], value = i, command = ws_answer) for i in range(10)]
+    ws['l_black'] = tk.Label(ws['frame'], text = 'black')
+    ws['a_black'] = tk.Label(ws['frame'])
+    ws['black'] = tk.IntVar()
+    ws['blackrb'] = [tk.Radiobutton(ws['frame'], text = i, variable = ws['black'], value = i, command = ws_answer) for i in range(10)]
+
+    for i in range(10):
+        ws['redrb'][i].grid(row = i+1, column = 0)
+        ws['bluerb'][i].grid(row = i+1, column = 1)
+        ws['blackrb'][i].grid(row = i+1, column = 2)
+    ws['l_red'].grid(row = 0, column = 0)
+    ws['l_blue'].grid(row = 0, column = 1)
+    ws['l_black'].grid(row = 0, column = 2)
+    ws['a_red'].grid(row = 11, column = 0)
+    ws['a_blue'].grid(row = 11, column = 1)
+    ws['a_black'].grid(row = 11, column = 2)
+
+def ws_answer():
+    red_answers = ['', 'C', 'B', 'A', 'A, C', 'B', 'A, C', 'A, B, C', 'A, B', 'B']
+    blue_answers = ['', 'B', 'A, C', 'B', 'A', 'B', 'B, C', 'C', 'A, C', 'A']
+    black_answers = ['', 'A, B, C', 'A, C', 'B', 'A, C', 'B', 'B, C', 'A, B', 'C', 'C']
+    ws['a_red'].config(text = red_answers[ws['red'].get()])
+    ws['a_blue'].config(text = blue_answers[ws['blue'].get()])
+    ws['a_black'].config(text = black_answers[ws['black'].get()])
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
