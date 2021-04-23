@@ -40,6 +40,7 @@ def update():
     sw_answer()
     tb_answer()
     ss_answer()
+    cw_answer()
 
 def reset_module():
     module = mod['module'].get()
@@ -100,7 +101,7 @@ def change_module():
         loaded = mc['frame']
     elif module == "complicated wires":
         cw['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
-        loaded = mc['frame']
+        loaded = cw['frame']
 
 def pph_init():
     pph['frame'] = tk.Frame(frame1)
@@ -115,7 +116,7 @@ def pph_init():
     pph['lfrk'] = tk.BooleanVar(value = False)
     pph['e_lfrk'] = tk.Checkbutton(pph['frame'], text = "lit FRK", variable = pph['lfrk'], command = update)
     pph['batteries'] = tk.IntVar(value = 1)
-    pph['e1_batteries'] = tk.Radiobutton(pph['frame'], text = '1 battery', variable = pph['batteries'], value = 1, command = update)
+    pph['e1_batteries'] = tk.Radiobutton(pph['frame'], text = '0-1 batteries', variable = pph['batteries'], value = 1, command = update)
     pph['e2_batteries'] = tk.Radiobutton(pph['frame'], text = '2 batteries', variable = pph['batteries'], value = 2, command = update)
     pph['e3_batteries'] = tk.Radiobutton(pph['frame'], text = '3+ batteries', variable = pph['batteries'], value = 3, command = update)
     pph['resetmod_button'] = tk.Button(pph['frame'], text = "Reset Module", command = reset_module)
@@ -575,13 +576,13 @@ def cw_init():
     cw['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
     cw['cframe'] = tk.Frame(cw['frame'])
     cw['r'] = tk.BooleanVar()
-    cw['rcb'] = tk.Checkbutton(cw['cframe'], text = 'red', variable = cw['r'])
+    cw['rcb'] = tk.Checkbutton(cw['cframe'], text = 'red', variable = cw['r'], command = cw_answer)
     cw['b'] = tk.BooleanVar()
-    cw['bcb'] = tk.Checkbutton(cw['cframe'], text = 'blue', variable = cw['b'])
+    cw['bcb'] = tk.Checkbutton(cw['cframe'], text = 'blue', variable = cw['b'], command = cw_answer)
     cw['s'] = tk.BooleanVar()
-    cw['scb'] = tk.Checkbutton(cw['cframe'], text = 'star', variable = cw['s'])
+    cw['scb'] = tk.Checkbutton(cw['cframe'], text = 'star', variable = cw['s'], command = cw_answer)
     cw['l'] = tk.BooleanVar()
-    cw['lcb'] = tk.Checkbutton(cw['cframe'], text = 'LED', variable = cw['l'])
+    cw['lcb'] = tk.Checkbutton(cw['cframe'], text = 'LED', variable = cw['l'], command = cw_answer)
 
     cw['l_dep'] = tk.Label(cw['frame'], text = 'dependencies', fg = 'grey')
     cw['edep'] = Swagbutton(cw['frame'], text = '✗ even', fg = 'grey')
@@ -599,7 +600,41 @@ def cw_init():
     cw['edep'].grid(row = 2, column = 0, sticky = 'w')
     cw['bdep'].grid(row = 3, column = 0, sticky = 'w')
     cw['pdep'].grid(row = 4, column = 0, sticky = 'w')
-    cw['alabel'].grid(row  = 1, column = 2, columnspan = 4)
+    cw['alabel'].grid(row  = 1, rowspan = 4, column = 0, columnspan = 2)
+
+    cw_answer()
+
+def cw_answer():
+    r = cw['r'].get()
+    b = cw['b'].get()
+    s = cw['s'].get()
+    l = cw['l'].get()
+    cw['edep'].deselect()
+    cw['bdep'].deselect()
+    cw['pdep'].deselect()
+    if (not r and not b and not s and not l) or (r and not b and s and not l) or (not r and not b and s and not l):
+        cw['alabel'].config(text = 'cut')
+    if (not r and not b and not s and l) or (r and b and s and l) or (not r and b and s and not l):
+        cw['alabel'].config(text = 'do not cut')
+    if (not r and b and not s and not l) or (r and not b and not s and not l) or (r and b and not s and not l) or (r and b and not s and l):
+        if pph['digit'].get() == 'even':
+            cw['alabel'].config(text = 'cut')
+        else: 
+            cw['alabel'].config(text = 'do not cut')
+        cw['edep'].select()
+    if (not r and b and not s and l) or (r and b and s and not l) or (not r and b and s and l):
+        if pph['pport'].get():
+            cw['alabel'].config(text = 'cut')
+        else: 
+            cw['alabel'].config(text = 'do not cut')
+        cw['pdep'].select()
+    if (r and not b and not s and l) or (r and not b and s and l) or (not r and not b and s and l):
+        if pph['batteries'].get() > 1:
+            cw['alabel'].config(text = 'cut')
+        else:
+            cw['alabel'].config(text = 'do not cut')
+        cw['bdep'].select()
+    
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
