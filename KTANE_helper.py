@@ -15,6 +15,7 @@ cw = {}
 ws = {}
 mz = {}
 pw = {}
+kb = {}
 
 class Swagbutton(tk.Label):
     def __init__(self, master=None, cnf={}, **kw):
@@ -41,6 +42,7 @@ def init_all():
     ws_init()
     mz_init()
     pw_init()
+    kb_init()
 
 def update():
     sw_answer()
@@ -74,6 +76,8 @@ def reset_module():
         mz_init()
     elif module == "passwords":
         pw_init()
+    elif module == "knobs":
+        kb_init()
     update()
     change_module()
 
@@ -123,6 +127,9 @@ def change_module():
     elif module == "passwords":
         pw['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
         loaded = pw['frame']
+    elif module == "knobs":
+        kb['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
+        loaded = kb['frame']
 
 def pph_init():
     pph['frame'] = tk.Frame(frame1)
@@ -581,17 +588,17 @@ def mc_init():
 def mc_answer():
     l = mc['l'].get()
     d = {'3.505 MHz': ['s', 'h', 'e', 'l', 'l'], '3.515 MHz': ['h', 'a', 'l', 'l', 's'], '3.522 MHz': ['s', 'l', 'i', 'c', 'k'], '3.532 MHz': ['t', 'r', 'i', 'c', 'k'], '3.535 MHz': ['b', 'o', 'x', 'e', 's'], '3.542 MHz': ['l', 'e', 'a', 'k', 's'], '3.545 MHz': ['s', 't', 'r', 'o', 'b', 'e'], '3.552 MHz': ['b', 'i', 's', 't', 'r', 'o'], '3.555 MHz': ['f', 'l', 'i', 'c', 'k'], '3.565 MHz': ['b', 'o', 'm', 'b', 's'], '3.572 MHz': ['b', 'r', 'e', 'a', 'k'], '3.575 MHz': ['b', 'r', 'i', 'c', 'k'], '3.582 MHz': ['s', 't', 'e', 'a', 'k'], '3.592 MHz': ['s', 't', 'i', 'n', 'g'], '3.595 MHz': ['v', 'e', 'c', 't', 'o', 'r'], '3.600 MHz': ['b', 'e', 'a', 't', 's']}
-    found = []
-    for i1 in d:
-        for i2 in d[i1]:
-            found.append(d[i1].count(i2) == list(l).count(i2))
-        for i2 in list(l):
-            found.append(list(l).count(i2) == d[i1].count(i2))
-        if set(found) == {True}:
-            mc['alabel'].config(text = i1)
-            return
-        found = []
-    mc['alabel'].config(text = '')
+    
+    options = d.copy()
+    for key in d:
+        value = d[key]
+        check = [char in value for char in l]
+        if check.count(False) > 0:
+            options.pop(key)
+    if len(options) == 1:
+        mc['alabel'].config(text = list(options.keys())[0])
+    else: 
+        mc['alabel'].config(text = '')
 
 def cw_init():
     cw['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
@@ -743,6 +750,31 @@ def pw_answer():
         pw['alabel'].config(text = options) 
     else: 
         pw['alabel'].config(text = '')
+
+def kb_init():
+    kb['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
+    kb['rframe'] = tk.Frame(kb['frame'])
+    kb['kbs'] = [tk.BooleanVar() for i in range(12)]
+    kb['cb'] = [tk.Checkbutton(kb['rframe'], variable = kb['kbs'][i], command = kb_answer) for i in range(12)]
+    kb['alabel'] = tk.Label(kb['frame'])
+    
+    for i in range(12):
+        kb['cb'][i].grid(row = i//6, column = i%6)
+    kb['rframe'].grid(row = 0, column = 0)
+    kb['alabel'].grid(row = 1, column = 0)
+
+def kb_answer():
+    knobs = [knob.get() for knob in kb['kbs']]
+    l = [[False, False, True, False, True, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, True, False, True, True], [False, True, True, False, False, True, True, True, True, True, False, True], [True, False, True, False, True, False, False, True, False, False, False, True], [False, False, False, False, True, False, True, False, False, True, True, True], [False, False, False, False, True, False, False, False, False, True, True, False], [True, False, True, True, True, True, True, True, True, False, True, False], [True, False, True, True, False, False, True, True, True, False, True, False]]
+    options = l.copy()
+    for b in l:
+        check = [b[i] for i in range(12) if knobs[i]]
+        if False in check:
+            options.remove(b)
+    if len(options) == 1:
+        kb['alabel'].config(text = ['up', 'up', 'down', 'down', 'left', 'left', 'right', 'right'][l.index(options[0])])
+    else:
+        kb['alabel'].config(text = '')
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
