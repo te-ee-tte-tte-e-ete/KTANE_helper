@@ -14,6 +14,7 @@ mc = {}
 cw = {}
 ws = {}
 mz = {}
+pw = {}
 
 class Swagbutton(tk.Label):
     def __init__(self, master=None, cnf={}, **kw):
@@ -39,6 +40,7 @@ def init_all():
     cw_init()
     ws_init()
     mz_init()
+    pw_init()
 
 def update():
     sw_answer()
@@ -70,6 +72,8 @@ def reset_module():
         ws_init()
     elif module == "mazes":
         mz_init()
+    elif module == "passwords":
+        pw_init()
     update()
     change_module()
 
@@ -116,6 +120,9 @@ def change_module():
     elif module == "mazes":
         mz['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
         loaded = mz['frame']
+    elif module == "passwords":
+        pw['frame'].grid(row = 0, rowspan = 10, column = 1, padx = 15)
+        loaded = pw['frame']
 
 def pph_init():
     pph['frame'] = tk.Frame(frame1)
@@ -710,6 +717,32 @@ def mz_answer():
                 return
     mz['ic'].config(text = f'invalid circle: {c}')
     
+def pw_init():
+    pw['frame'] = tk.Frame(frame1, borderwidth = 5, relief = 'groove')
+
+    for i in range(1, 6):
+        pw[str(i)] = tk.StringVar()
+        pw[str(i)].trace_add("write", lambda a, b, c: pw_answer())
+        pw['l'+str(i)] = tk.Label(pw['frame'], text = ['first', 'second', 'third', 'fourth', 'fifth'][i-1]+' letters')
+        pw['e'+str(i)] = tk.Entry(pw['frame'], textvariable = pw[str(i)])
+    pw['alabel'] = tk.Label(pw['frame'], wraplength = 200)
+
+    for i in range(1, 6):
+        pw['l'+str(i)].grid(row = (i-1)*2, column = 0)
+        pw['e'+str(i)].grid(row = (i-1)*2+1, column = 0)
+    pw['alabel'].grid(row = 10, column = 0)
+
+def pw_answer():
+    words = ['about', 'after', 'again', 'below', 'could', 'every', 'first', 'found', 'great', 'house', 'large', 'learn', 'never', 'other', 'place', 'plant', 'point', 'right', 'small', 'sound', 'spell', 'still', 'study', 'their', 'there', 'these', 'thing', 'think', 'three', 'water', 'where', 'which', 'world', 'would', 'write']
+    options = words.copy()
+    for word in words:
+        check = [[True if pw[str(i2+1)].get()[i].lower() == word[i2] else False for i in range(len(pw[str(i2+1)].get()))] for i2 in range(5)]
+        if (check[0].count(True) == 0 and len(check[0]) > 0) or (check[1].count(True) == 0 and len(check[1]) > 0) or (check[2].count(True) == 0 and len(check[2]) > 0) or (check[3].count(True) == 0 and len(check[3]) > 0) or (check[4].count(True) == 0 and len(check[4]) > 0):
+            options.remove(word)
+    if options != words:
+        pw['alabel'].config(text = options) 
+    else: 
+        pw['alabel'].config(text = '')
 
 root = tk.Tk()
 frame1 = tk.Frame(root)
